@@ -2,9 +2,7 @@
 // Sushi Burger App - Firebase with localStorage Fallback
 // ===================================================
 
-//
-
- State Management
+// State Management
 let orders = [];
 let availableToppings = ['🥑 אבוקדו', '🥒 מלפפון', '🍤 קנפיו', '🧅 בצל ירוק'];
 

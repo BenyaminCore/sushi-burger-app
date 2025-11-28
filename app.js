@@ -6,6 +6,9 @@
 let orders = [];
 let availableToppings = ['🥑 אבוקדו', '🥒 מלפפון', '🍤 קנפיו', '🧅 בצל ירוק'];
 
+// Default toppings that cannot be deleted
+const DEFAULT_TOPPINGS = ['🥑 אבוקדו', '🥒 מלפפון', '🍤 קנפיו', '🧅 בצל ירוק'];
+
 // Firebase References
 let ordersRef;
 let toppingsRef;
@@ -70,11 +73,15 @@ function renderToppings() {
     availableToppings.forEach((topping, index) => {
         const div = document.createElement('div');
         div.className = 'checkbox-option';
+
+        // Check if this is a default topping
+        const isDefaultTopping = DEFAULT_TOPPINGS.includes(topping);
+
         div.innerHTML = `
             <input type="checkbox" id="topping-${index}" value="${topping}">
             <label for="topping-${index}" class="checkbox-label">
                 ${topping}
-                <button type="button" class="btn-delete-topping" onclick="deleteTopping(${index})" title="מחק תוספת">❌</button>
+                ${!isDefaultTopping ? `<button type="button" class="btn-delete-topping" onclick="deleteTopping(${index})" title="מחק תוספת">❌</button>` : ''}
             </label>
         `;
         container.appendChild(div);

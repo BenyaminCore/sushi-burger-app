@@ -1,30 +1,38 @@
 // ===================================================
-// Sushi Burger App - Real-time Firebase Version
+// Sushi Burger App - Firebase with localStorage Fallback
 // ===================================================
 
-// State Management
+//
+
+ State Management
 let orders = [];
 let availableToppings = ['🥑 אבוקדו', '🥒 מלפפון', '🍤 קנפיו', '🧅 בצל ירוק'];
 
 // Firebase References
 let ordersRef;
 let toppingsRef;
+let useFirebase = false;
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
     // Check if Firebase is loaded
     if (typeof window.db === 'undefined') {
-        console.error('❌ Firebase not initialized! Please check firebase-config.js');
-        alert('שגיאה: Firebase לא מוגדר. אנא בדוק את קובץ ההגדרות.');
-        return;
+        console.warn('⚠️ Firebase not configured - using localStorage fallback');
+        useFirebase = false;
+        loadFromLocalStorage();
+        renderToppings();
+        renderOrders();
+    } else {
+        console.log('✅ Firebase connected - using real-time sync');
+        useFirebase = true;
+
+        // Initialize Firebase references
+        ordersRef = window.db.ref('orders');
+        toppingsRef = window.db.ref('toppings');
+
+        // Listen to real-time updates
+        setupFirebaseListeners();
     }
-
-    // Initialize Firebase references
-    ordersRef = window.db.ref('orders');
-    toppingsRef = window.db.ref('toppings');
-
-    // Listen to real-time updates
-    setupFirebaseListeners();
 
     // Form Submit
     document.getElementById('orderForm').addEventListener('submit', (e) => {
@@ -66,7 +74,10 @@ function renderToppings() {
         div.className = 'checkbox-option';
         div.innerHTML = `
             <input type="checkbox" id="topping-${index}" value="${topping}">
-            <label for="topping-${index}" class="checkbox-label">${topping}</label>
+            <label for="topping-${index}" class="checkbox-label">
+                ${topping}
+                <button type="button" class="btn-delete-topping" onclick="deleteTopping(${index})" title="מחק תוספת">❌</button>
+            </label>
         `;
         container.appendChild(div);
     });
@@ -91,15 +102,44 @@ function addNewTopping() {
     const emoji = getEmojiForTopping(toppingName);
     const newTopping = `${emoji} ${toppingName}`;
 
-    // Update Firebase
-    const updatedToppings = [...availableToppings, newTopping];
-    toppingsRef.set(updatedToppings).then(() => {
+    if (useFirebase) {
+        // Update Firebase
+        const updatedToppings = [...availableToppings, newTopping];
+        toppingsRef.set(updatedToppings).then(() => {
+            input.value = '';
+            showNotification(`התוספת "${toppingName}" נוספה בהצלחה! ✨`);
+        }).catch((error) => {
+            console.error('Error adding topping:', error);
+            alert('שגיאה בהוספת התוספת');
+        });
+    } else {
+        // Update localStorage
+        availableToppings.push(newTopping);
+        saveToLocalStorage();
+        renderToppings();
         input.value = '';
         showNotification(`התוספת "${toppingName}" נוספה בהצלחה! ✨`);
-    }).catch((error) => {
-        console.error('Error adding topping:', error);
-        alert('שגיאה בהוספת התוספת');
-    });
+    }
+}
+
+// Delete Topping from Available List
+function deleteTopping(index) {
+    if (confirm(`למחוק את התוספת "${availableToppings[index]}"?`)) {
+        availableToppings.splice(index, 1);
+
+        if (useFirebase) {
+            toppingsRef.set(availableToppings).then(() => {
+                showNotification('התוספת נמחקה');
+            }).catch((error) => {
+                console.error('Error deleting topping:', error);
+                alert('שגיאה במחיקת התוספת');
+            });
+        } else {
+            saveToLocalStorage();
+            renderToppings();
+            showNotification('התוספת נמחקה');
+        }
+    }
 }
 
 // Get Emoji for Topping
@@ -144,30 +184,48 @@ function addOrder() {
         toppings: selectedToppings
     };
 
-    // Save to Firebase
-    ordersRef.child(order.id.toString()).set(order).then(() => {
-        // Reset form
-        document.getElementById('orderForm').reset();
-        document.getElementById('withSalmon').checked = true;
-
-        // Show success notification
+    if (useFirebase) {
+        // Save to Firebase
+        ordersRef.child(order.id.toString()).set(order).then(() => {
+            resetForm();
+            showNotification(`ההזמנה של ${name} נוספה בहצלחה! 🎉`);
+        }).catch((error) => {
+            console.error('Error adding order:', error);
+            alert('שגיאה בהוספת ההזמנה');
+        });
+    } else {
+        // Save to localStorage
+        orders.push(order);
+        saveToLocalStorage();
+        renderOrders();
+        resetForm();
         showNotification(`ההזמנה של ${name} נוספה בהצלחה! 🎉`);
-    }).catch((error) => {
-        console.error('Error adding order:', error);
-        alert('שגיאה בהוספת ההזמנה');
-    });
+    }
+}
+
+// Reset Form Helper
+function resetForm() {
+    document.getElementById('orderForm').reset();
+    document.getElementById('withSalmon').checked = true;
 }
 
 // Delete Order
 function deleteOrder(id) {
     const order = orders.find(o => o.id === id);
     if (order && confirm(`למחוק את ההזמנה של ${order.name}?`)) {
-        ordersRef.child(id.toString()).remove().then(() => {
+        if (useFirebase) {
+            ordersRef.child(id.toString()).remove().then(() => {
+                showNotification('ההזמנה נמחקה');
+            }).catch((error) => {
+                console.error('Error deleting order:', error);
+                alert('שגיאה במחיקת ההזמנה');
+            });
+        } else {
+            orders = orders.filter(o => o.id !== id);
+            saveToLocalStorage();
+            renderOrders();
             showNotification('ההזמנה נמחקה');
-        }).catch((error) => {
-            console.error('Error deleting order:', error);
-            alert('שגיאה במחיקת ההזמנה');
-        });
+        }
     }
 }
 
@@ -196,6 +254,25 @@ function renderOrders() {
             ` : '<div style="opacity: 0.7; text-align: center; padding: 0.5rem;">ללא תוספות נוספות</div>'}
         </div>
     `).join('');
+}
+
+// Local Storage Functions
+function saveToLocalStorage() {
+    localStorage.setItem('sushiBurgerOrders', JSON.stringify(orders));
+    localStorage.setItem('sushiBurgerToppings', JSON.stringify(availableToppings));
+}
+
+function loadFromLocalStorage() {
+    const savedOrders = localStorage.getItem('sushiBurgerOrders');
+    const savedToppings = localStorage.getItem('sushiBurgerToppings');
+
+    if (savedOrders) {
+        orders = JSON.parse(savedOrders);
+    }
+
+    if (savedToppings) {
+        availableToppings = JSON.parse(savedToppings);
+    }
 }
 
 // Utility Functions

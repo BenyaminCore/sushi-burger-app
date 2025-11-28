@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>סושי בורגר - הזמנת משפחה</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo-container">
+                <img src="logo.png" alt="סושי בורגר" class="logo">
+                <div>
+                    <h1>סושי בורגר</h1>
+                    <p class="subtitle">ארוחת ערב משפחתית 🍔🍣</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Order Form -->
+        <div class="card">
+            <h2 style="margin-bottom: 1.5rem;">הזמנה חדשה</h2>
+            <form class="order-form" id="orderForm">
+                <!-- Name Input -->
+                <div class="form-group">
+                    <label for="name">שם</label>
+                    <input type="text" id="name" placeholder="הכנס את השם שלך..." required>
+                </div>
+
+                <!-- Main Topping - Salmon -->
+                <div class="form-group">
+                    <label>תוספת עיקרית</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="withSalmon" name="salmon" value="עם סלמון" checked>
+                            <label for="withSalmon" class="radio-label">🐟 עם סלמון</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="noSalmon" name="salmon" value="ללא סלמון">
+                            <label for="noSalmon" class="radio-label">🚫 ללא סלמון</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary Toppings -->
+                <div class="form-group">
+                    <label>תוספות</label>
+                    <div class="checkbox-group" id="toppingsContainer">
+                        <!-- Toppings will be rendered here by JavaScript -->
+                    </div>
+
+                    <!-- Add Custom Topping -->
+                    <div class="add-topping-section">
+                        <input type="text" id="newTopping" placeholder="הוסף תוספת חדשה...">
+                        <button type="button" class="btn-secondary" onclick="addNewTopping()">➕ הוסף</button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-primary">✅ הוסף הזמנה</button>
+            </form>
+        </div>
+
+        <!-- Orders Display -->
+        <div class="card">
+            <h2 style="margin-bottom: 1.5rem;">ההזמנות שלנו</h2>
+            <div class="orders-container" id="ordersContainer">
+                <div class="empty-state">עדיין אין הזמנות... תהיו הראשונים! 🎉</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <!-- App Script -->
+    <script src="app.js"></script>
+</body>
+
+</html>

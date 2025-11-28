@@ -16,13 +16,13 @@
 // ===================================================
 
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY_HERE",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyDc1vzrZwezvVsSsVh46MyeIQw0xAJbV1o",
+    authDomain: "sushi-burger-a9639.firebaseapp.com",
+    databaseURL: "https://sushi-burger-a9639-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "sushi-burger-a9639",
+    storageBucket: "sushi-burger-a9639.firebasestorage.app",
+    messagingSenderId: "298120394110",
+    appId: "1:298120394110:web:cd589a65028f607a8a2f2f"
 };
 
 // Initialize Firebase
